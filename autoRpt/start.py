@@ -10,9 +10,13 @@
 @desc:
 '''
 import  sys
+import datetime
 import rpt.rpt as week
 import utils.sqlUtils as sqlutils
 import utils.dbUtils as db
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+
 '''周报服务'''
 def runWeekRpt(startDate, endDate, siteId):
     print('rum weekEpt server......')
@@ -33,14 +37,28 @@ if __name__ == '__main__':
         print(
             'erroe, need 2 input param at least, you can run this script like this: python start.py 1 af140c3b88a611e8ad8d7cd30ae0f656')
         exit(1)
-    else:
-        startDate = '2019-01-01'
-        endDate = '2019-01-31'
+        else:
+        startDate = ''
+        endDate = ''
         rptType = sys.argv[1]
         siteId = sys.argv[2]
+        today = datetime.date.today()
+        # 周报服务
         if rptType == '1':
+            befor_8weeks_start = today - timedelta(days=49 + today.weekday())  # 8个周数据（包含本周）
+            this_week_end = today + timedelta(days=6 - today.weekday())
+            startDate = befor_8weeks_start.strftime("%Y-%m-%d")
+            endDate = this_week_end.strftime("%Y-%m-%d")
+            print("now is outputing weekRpt from %s to %s ..." % (startDate, endDate))
             runWeekRpt(startDate, endDate, siteId)
-        # elif rptType == '2':
+        # 月报服务
+        elif rptType == '2':
+            befor_5month = today - relativedelta(months=4)
+            befor_5month_start = datetime.date(befor_5month.year, befor_5month.month, 1)  # 5个月数据（包含本月）
+            this_month_end = datetime.date(today.year, today.month + 1, 1) - datetime.timedelta(1)
+            startDate = befor_5month_start.strftime("%Y-%m-%d")
+            endDate = this_month_end.strftime("%Y-%m-%d")
+            print("now is outputing monthRpt from %s to %s ..." % (startDate, endDate))
             # runMonthRpt(startDate, endDate, siteId)
         else:
             print('erroe: the fisrt param is invalid!')
